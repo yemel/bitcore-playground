@@ -16,8 +16,19 @@ angular.module('playApp.units', ['ngRoute'])
   $scope.exampleCode = "";
 
   function setExampleCode(value, code, fiat) {
-    var template = "var unit = new bitcore.Unit(@value, @code);"
-    template = template.replace('@value', $scope.unit.BTC);
+    var methods = {
+      'BTC': 'fromBTC',
+      'mBTC': 'fromMilis',
+      'bits': 'fromBits',
+      'satoshis': 'fromSatoshis'
+    }
+
+    var template = fiat
+      ? "var unit = new bitcore.Unit.fromFiat(@value, @code);"
+      : "var unit = new bitcore.Unit.@method(@value);";
+
+    template = template.replace('@method', methods[code]);
+    template = template.replace('@value', value);
     template = template.replace('@code', code);
     $scope.exampleCode = template;
   };
@@ -47,7 +58,7 @@ angular.module('playApp.units', ['ngRoute'])
       $scope.unit.fiat = $scope.currency ? unit.atRate($scope.currency.rate) : 0;
     }
 
-    setExampleCode(value, code, angular.isString(code));
+    setExampleCode(value, code, !angular.isString(code));
   };
 
   $scope.updateFiat = function(value, rate) {
